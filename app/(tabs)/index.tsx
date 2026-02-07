@@ -1,54 +1,51 @@
-import { Image } from "expo-image";
-import { StyleSheet } from "react-native";
-
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Button } from "@react-navigation/elements";
-
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 export default function HomeScreen() {
+  const router = useRouter();
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Bienvenue </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Voire les séances passées:</ThemedText>
-        <Button onPress={() => alert("Button pressed")}>
-          Voir les séances passées
-        </Button>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Ajouter une nouvelle séance:</ThemedText>
-        <Button>Ajouter une nouvelle séance</Button>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>GYM TRACKER</Text>
+      <View style={styles.btnContainer}>
+        <Pressable
+          style={styles.button}
+          onPress={() => router.push("/seances/liste")}
+        >
+          <Text>Voir l'historique des séances</Text>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => router.push("/seances/create")}
+        >
+          <Text>Créer une nouvelle séance</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
-
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
+  container: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    backgroundColor: "#14110F",
+    padding: 16,
   },
-  stepContainer: {
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#ccc",
+  },
+  btnContainer: {
     gap: 8,
     marginBottom: 8,
+    width: "100%",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  button: {
+    height: 50,
+    backgroundColor: "#7E7F83",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
   },
 });
