@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+
+import { Colors } from "@/constants/theme";
 import db from "../../../services/database";
 export default function CreateSessionScreen() {
   const router = useRouter();
@@ -34,6 +36,7 @@ export default function CreateSessionScreen() {
       <TextInput
         style={styles.input}
         placeholder="Ex: Push Day, Haut du corps..."
+        placeholderTextColor={Colors.dark.textMuted}
         value={nom}
         onChangeText={setNom}
         autoFocus={true}
@@ -43,6 +46,7 @@ export default function CreateSessionScreen() {
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder="Ex: Essayer 80kg au bench..."
+        placeholderTextColor={Colors.dark.textMuted}
         value={notes}
         onChangeText={setNotes}
         multiline={true}
@@ -57,25 +61,30 @@ export default function CreateSessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#14110F" },
+  container: { flex: 1, padding: 20, backgroundColor: Colors.dark.background },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center",
-    color: "#ccc",
+    color: Colors.dark.text,
   },
 
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 8, color: "#ccc" },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: Colors.dark.text,
+  },
   input: {
-    backgroundColor: "#2c2a29",
+    backgroundColor: Colors.dark.inputBackground,
     borderWidth: 1,
-    borderColor: "#555",
+    borderColor: Colors.dark.inputBorder,
     padding: 15,
     borderRadius: 10,
     fontSize: 16,
     marginBottom: 20,
-    color: "#ccc",
+    color: Colors.dark.text,
   },
   textArea: {
     height: 100,
@@ -83,11 +92,13 @@ const styles = StyleSheet.create({
   },
 
   btnSave: {
-    backgroundColor: "#D9C5B2",
+    backgroundColor: Colors.dark.buttonBackground,
     padding: 18,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
-  btnText: { color: "#14110F", fontSize: 18, fontWeight: "bold" },
+  btnText: { color: Colors.dark.buttonText, fontSize: 18, fontWeight: "bold" },
 });

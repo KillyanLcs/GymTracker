@@ -1,6 +1,7 @@
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -24,6 +25,21 @@ export default function SessionListScreen() {
   const router = useRouter();
   const [seances, setSeances] = useState<any[]>([]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadSeances();
+    }, []),
+  );
+
+  const loadSeances = () => {
+    try {
+      const data = db.getAllSync("SELECT * FROM seances ORDER BY date DESC");
+      setSeances(data);
+    } catch (e) {
+      console.error("Erreur chargement :", e);
+    }
+  };
+
   const supprimerSeance = (id: number) => {
     Alert.alert(
       "Supprimer la séance",
@@ -36,24 +52,18 @@ export default function SessionListScreen() {
           onPress: () => {
             try {
               db.runSync("DELETE FROM seances WHERE id = ?", [id]);
-              const updatedSeances = seances.filter((s) => s.id !== id);
-              setSeances(updatedSeances);
+              setSeances((currentSeances) =>
+                currentSeances.filter((s) => s.id !== id),
+              );
             } catch (e) {
-              console.error(e);
+              console.error("Erreur suppression :", e);
+              Alert.alert("Erreur", "Impossible de supprimer la séance.");
             }
           },
         },
       ],
     );
   };
-  useEffect(() => {
-    try {
-      const data = db.getAllSync("SELECT * FROM seances ORDER BY date DESC");
-      setSeances(data);
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
 
   const renderItem = ({ item }: { item: any }) => {
     const { day, month } = formatDate(item.date);
@@ -61,7 +71,6 @@ export default function SessionListScreen() {
       <Pressable
         style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         onPress={() => {
-          console.log("Navigating to séance with ID:", item.id);
           router.push({
             pathname: "/seances/[id]",
             params: { id: item.id },
@@ -80,7 +89,11 @@ export default function SessionListScreen() {
             {item.notes ? item.notes : "Aucune note"}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={Colors?.dark?.icon || "#ccc"}
+        />
       </Pressable>
     );
   };
@@ -96,6 +109,9 @@ export default function SessionListScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Aucune séance pour le moment.</Text>
+            <Text style={styles.emptySubText}>
+              Appuie sur "Créer une nouvelle séance" pour commencer
+            </Text>
           </View>
         }
       />
@@ -106,32 +122,32 @@ export default function SessionListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#14110F",
+    backgroundColor: Colors?.dark?.background,
     paddingHorizontal: 16,
     paddingTop: 20,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#F2F2F7",
+    color: Colors?.dark?.text,
     marginBottom: 20,
     marginLeft: 4,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#14110F",
+    backgroundColor: Colors?.dark?.surface,
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
-    borderColor: "#F2F2F7",
+    borderColor: Colors?.dark?.border,
     borderWidth: 1,
   },
   cardPressed: {
     opacity: 0.7,
   },
   dateBox: {
-    backgroundColor: "#14110F",
+    backgroundColor: Colors?.dark?.surfaceAlt,
     borderRadius: 10,
     width: 50,
     height: 50,
@@ -142,11 +158,11 @@ const styles = StyleSheet.create({
   DateJour: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#F3F3F4",
+    color: Colors?.dark?.text,
   },
   dateMois: {
     fontSize: 10,
-    color: "#8E8E93",
+    color: Colors?.dark?.textMuted,
     fontWeight: "600",
   },
   infoBox: {
@@ -156,12 +172,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#F2F2F7",
+    color: Colors?.dark?.text,
     marginBottom: 2,
   },
   subtitle: {
     fontSize: 14,
-    color: "#8E8E93",
+    color: Colors?.dark?.textMuted,
   },
   emptyContainer: {
     marginTop: 100,
@@ -170,11 +186,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#F2F2F7",
+    color: Colors?.dark?.text,
   },
   emptySubText: {
     fontSize: 14,
-    color: "#999",
+    color: Colors?.dark?.textMuted,
+    textAlign: "center",
     marginTop: 5,
   },
 });

@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import { Colors } from "@/constants/theme";
 export default function HomeScreen() {
   const router = useRouter();
   return (
@@ -10,13 +12,13 @@ export default function HomeScreen() {
           style={styles.button}
           onPress={() => router.push("/seances/liste")}
         >
-          <Text>Voir l'historique des séances</Text>
+          <Text style={styles.buttonText}>Voir l'historique des séances</Text>
         </Pressable>
         <Pressable
           style={styles.button}
           onPress={() => router.push("/seances/create")}
         >
-          <Text>Créer une nouvelle séance</Text>
+          <Text style={styles.buttonText}>Créer une nouvelle séance</Text>
         </Pressable>
       </View>
     </View>
@@ -27,14 +29,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#14110F",
+    backgroundColor: Colors.dark.background,
     padding: 16,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 16,
-    color: "#ccc",
+    color: Colors.dark.text,
   },
   btnContainer: {
     gap: 8,
@@ -43,9 +45,16 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 50,
-    backgroundColor: "#7E7F83",
+    backgroundColor: Colors.dark.buttonBackground,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  buttonText: {
+    color: Colors.dark.buttonText,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
