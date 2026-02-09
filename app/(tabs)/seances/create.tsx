@@ -19,8 +19,10 @@ export default function CreateSessionScreen() {
         [nom, date, notes],
       );
       console.log("Séance créée avec succès, ID :", result.lastInsertRowId);
-      //router.replace(`/seance/${result.lastInsertRowId}`);// faire dinamyque pour rediriger vers la page de la séance créée plus tard
-      router.push("/seances/liste");
+      router.replace({
+        pathname: "/seances/[id]",
+        params: { id: result.lastInsertRowId },
+      });
     } catch (error) {
       console.error("Erreur lors de la création de la séance :", error);
     }
