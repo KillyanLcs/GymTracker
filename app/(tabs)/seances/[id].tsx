@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -33,8 +32,6 @@ export default function SeanceDetailScreen() {
   const [poids, setPoids] = useState("");
   const [reps, setReps] = useState("");
   const [logs, setLogs] = useState<any[]>([]);
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     loadInfoSeance();
@@ -94,12 +91,6 @@ export default function SeanceDetailScreen() {
     );
   };
 
-  const onChangeDate = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || date;
-    if (Platform.OS === "android") setShowDatePicker(false);
-    setDate(currentDate);
-  };
-
   const loadInfoSeance = () => {
     try {
       const seance = db.getFirstSync("SELECT nom FROM seances WHERE id = ?", [
@@ -140,17 +131,16 @@ export default function SeanceDetailScreen() {
   };
 
   const handleAddSerie = () => {
-    if (!nomExercice.trim() || !poids || !reps || !date) {
+    if (!nomExercice.trim() || !poids || !reps) {
       Alert.alert(
         "Oups",
-        "Veuillez remplir le nom, le poids, les répétitions et la date.",
+        "Veuillez remplir le nom, le poids et les répétitions .",
       );
       return;
     }
     try {
       let exerciceId: number;
       const nomPropre = nomExercice.trim();
-      const dateIso = date.toISOString();
       const exerciceExistant = db.getFirstSync(
         "SELECT id FROM exercices WHERE LOWER(nom) = LOWER(?)",
         [nomPropre],
@@ -165,8 +155,8 @@ export default function SeanceDetailScreen() {
         loadExercices();
       }
       db.runSync(
-        "INSERT INTO series (id_seance, id_exercice, poids, reps, date) VALUES (?, ?, ?, ?, ?)",
-        [seanceId, exerciceId, parseFloat(poids), parseInt(reps), dateIso],
+        "INSERT INTO series (id_seance, id_exercice, poids, reps) VALUES (?, ?, ?, ?)",
+        [seanceId, exerciceId, parseFloat(poids), parseInt(reps)],
       );
       setReps("");
       loadLogs();
@@ -205,10 +195,7 @@ export default function SeanceDetailScreen() {
               </Text>
             </Pressable>
           ))}
-
-          
         </ScrollView>
-        
       </View>
       <TextInput
         style={styles.input}
