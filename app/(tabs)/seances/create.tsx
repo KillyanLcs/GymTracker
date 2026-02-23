@@ -1,13 +1,22 @@
+import { Colors } from "@/constants/theme";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
-import { Colors } from "@/constants/theme";
+import {
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 import db from "../../../services/database";
 export default function CreateSessionScreen() {
   const router = useRouter();
   const [nom, setNom] = useState("");
   const [notes, setNotes] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
 
   const handleCreate = () => {
     if (nom.trim() === "") {
@@ -15,10 +24,10 @@ export default function CreateSessionScreen() {
       return;
     }
     try {
-      const date = new Date().toISOString();
+      const dateBDD = date.toISOString();
       const result = db.runSync(
         "INSERT INTO seances (nom, date, notes) VALUES (?, ?, ?)",
-        [nom, date, notes],
+        [nom, dateBDD, notes],
       );
       console.log("Séance créée avec succès, ID :", result.lastInsertRowId);
       router.replace({
@@ -29,6 +38,15 @@ export default function CreateSessionScreen() {
       console.error("Erreur lors de la création de la séance :", error);
     }
   };
+
+  const onChange = (event: any, selectedDate?: Date) => {
+    const dateCourante = selectedDate || date;
+    if (Platform.OS == "android") {
+      setShow(false);
+    }
+    setDate(dateCourante);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Nouvelle Séance</Text>
@@ -52,7 +70,21 @@ export default function CreateSessionScreen() {
         multiline={true}
         numberOfLines={4}
       />
-
+      <Pressable style={styles.btnDate} onPress={() => setShow(true)}>
+        <Text style={styles.btnDateText}>
+          Séance du : {date.toLocaleDateString("fr-FR")}
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode="date"
+              is24Hour={true}
+              display="spinner"
+              onChange={onChange}
+            />
+          )}
+        </Text>
+      </Pressable>
       <Pressable style={styles.btnSave} onPress={handleCreate}>
         <Text style={styles.btnText}>Ajouter la séance</Text>
       </Pressable>
@@ -101,4 +133,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.border,
   },
   btnText: { color: Colors.dark.buttonText, fontSize: 18, fontWeight: "bold" },
+  btnDate: {
+    backgroundColor: "transparent",
+    padding: 18,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.dark.inputBorder,
+  },
+  btnDateText: {
+    color: Colors.dark.textMuted,
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

@@ -19,6 +19,7 @@ interface ExoResult {
 
 interface SeanceResult {
   nom: string;
+  date: string;
 }
 
 export default function SeanceDetailScreen() {
@@ -32,12 +33,26 @@ export default function SeanceDetailScreen() {
   const [poids, setPoids] = useState("");
   const [reps, setReps] = useState("");
   const [logs, setLogs] = useState<any[]>([]);
+  const [date, setDate] = useState("Chargement...");
+  const [tempsRestant, setTempsRestant] = useState(90);
+  const [chronoActif, setChronoActif] = useState(false);
 
   useEffect(() => {
     loadInfoSeance();
     loadExercices();
     loadLogs();
+    handleChrono();
   }, []);
+
+  const handleChrono = () => {};
+
+  const formatDate = (rawDate: string) => {
+    const parsedDate = new Date(rawDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return rawDate;
+    }
+    return parsedDate.toLocaleDateString("fr-FR");
+  };
 
   const supprimerRep = (id: number) => {
     Alert.alert(
@@ -93,11 +108,15 @@ export default function SeanceDetailScreen() {
 
   const loadInfoSeance = () => {
     try {
-      const seance = db.getFirstSync("SELECT nom FROM seances WHERE id = ?", [
-        seanceId,
-      ]) as SeanceResult | null;
+      const seance = db.getFirstSync(
+        "SELECT nom, date FROM seances WHERE id = ?",
+        [seanceId],
+      ) as SeanceResult | null;
 
-      if (seance) setNom(seance.nom);
+      if (seance) {
+        setNom(seance.nom);
+        setDate(seance.date);
+      }
     } catch (e) {
       console.error("Erreur chargement séance :", e);
     }
@@ -168,7 +187,9 @@ export default function SeanceDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Séance: {nom}</Text>
+      <Text style={styles.header}>
+        Séance: {nom} du {formatDate(date)}
+      </Text>
 
       <View style={{ height: 50, marginBottom: 15 }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
