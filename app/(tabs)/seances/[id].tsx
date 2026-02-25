@@ -123,7 +123,7 @@ export default function SeanceDetailScreen() {
 
   const loadExercices = () => {
     try {
-      const result = db.getAllSync("SELECT * FROM exercices where id");
+      const result = db.getAllSync("SELECT DISTINCT");
       setExercices(result);
     } catch (e) {
       console.error("Erreur chargement exercices :", e);

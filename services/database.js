@@ -22,21 +22,12 @@ export const initDB = () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_seance INTEGER,
         id_exercice INTEGER,
-        num_series INTEGER,
         reps INTEGER,
         poids REAL,
-        rpe INTEGER,
         FOREIGN KEY(id_seance) REFERENCES seances(id) ON DELETE CASCADE,
         FOREIGN KEY(id_exercice) REFERENCES exercices(id)
       );
 
-      CREATE TABLE IF NOT EXISTS mesures (
-        id_mesure INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
-        type TEXT,
-        valeur REAL,
-        unite TEXT
-      );
     `);
     console.log("Base de données initialisée avec succès !");
   } catch (error) {
