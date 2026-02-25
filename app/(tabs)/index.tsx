@@ -22,6 +22,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
     </View>
+    //ajouter une pages mes exercices pour afficher tout les exercices
   );
 }
 const styles = StyleSheet.create({

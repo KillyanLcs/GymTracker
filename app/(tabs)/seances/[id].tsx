@@ -35,14 +35,38 @@ export default function SeanceDetailScreen() {
   const [date, setDate] = useState("Chargement...");
   const [tempsRestant, setTempsRestant] = useState(90);
   const [chronoActif, setChronoActif] = useState(false);
-
+  const [allExercices, setAllExercices] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   useEffect(() => {
     loadInfoSeance();
     loadExercices();
     loadLogs();
     handleChrono();
+    loadAllExercices();
   }, []);
 
+  const loadAllExercices = () => {
+    //pour le remplissage auto lors de l'écriture
+    try {
+      const result = db.getAllSync("Select * from exercices");
+      setAllExercices(result);
+    } catch (e) {
+      console.error("Erreur chargement liste des exercices :", e);
+    }
+  };
+
+  const gererSaisieExo = (text: string) => {
+    setNomExercice(text);
+    setExoSelectionne(null);
+    if (text.length > 0) {
+      const resultats = allExercices.filter((exo) =>
+        exo.nom.toLowerCase().includes(text.toLowerCase()),
+      );
+      setSuggestions(resultats);
+    } else {
+      setSuggestions([]);
+    }
+  };
   const handleChrono = () => {};
 
   const formatDate = (rawDate: string) => {
@@ -123,10 +147,16 @@ export default function SeanceDetailScreen() {
 
   const loadExercices = () => {
     try {
-      const result = db.getAllSync("SELECT DISTINCT");
+      const result = db.getAllSync(
+        `SELECT DISTINCT exercices.id, exercices.nom 
+         FROM exercices 
+         JOIN series ON series.id_exercice = exercices.id 
+         WHERE series.id_seance = ?`,
+        [seanceId],
+      );
       setExercices(result);
     } catch (e) {
-      console.error("Erreur chargement exercices :", e);
+      console.error("Erreur chargement exercices de la séance :", e);
     }
   };
 
@@ -170,7 +200,6 @@ export default function SeanceDetailScreen() {
           nomPropre,
         ]);
         exerciceId = resultExo.lastInsertRowId;
-        loadExercices();
       }
       db.runSync(
         "INSERT INTO series (id_seance, id_exercice, poids, reps) VALUES (?, ?, ?, ?)",
@@ -178,6 +207,8 @@ export default function SeanceDetailScreen() {
       );
       setReps("");
       loadLogs();
+      loadExercices();
+      loadAllExercices();
     } catch (e) {
       console.error("Erreur ajout série :", e);
       Alert.alert("Erreur", "Impossible d'ajouter la série.");
@@ -218,15 +249,35 @@ export default function SeanceDetailScreen() {
         </ScrollView>
       </View>
       <TextInput
-        style={[styles.input, styles.rowInput]}
+        style={[styles.input]}
         placeholder="Nom de l'exercice (ex: Curl)"
         placeholderTextColor={Colors.dark.textMuted}
         value={nomExercice}
         onChangeText={(text) => {
           setNomExercice(text);
           setExoSelectionne(null);
+          gererSaisieExo(text);
         }}
       />
+      {suggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          <ScrollView keyboardShouldPersistTaps="handled">
+            {suggestions.map((item) => (
+              <Pressable
+                key={item.id}
+                style={styles.suggestionItem}
+                onPress={() => {
+                  setNomExercice(item.nom);
+                  setExoSelectionne(item.id);
+                  setSuggestions([]);
+                }}
+              >
+                <Text style={styles.suggestionText}>{item.nom}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      )}
       <View style={styles.formRow}>
         <TextInput
           style={[styles.input, styles.rowInput]}
@@ -353,5 +404,27 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Colors.dark.textMuted,
     marginTop: 30,
+  },
+  suggestionsContainer: {
+    position: "absolute",
+    top: 190,
+    left: 20,
+    right: 20,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+    maxHeight: 150,
+    zIndex: 1000,
+    elevation: 10,
+  },
+  suggestionItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.border,
+  },
+  suggestionText: {
+    color: Colors.dark.text,
+    fontSize: 16,
   },
 });
