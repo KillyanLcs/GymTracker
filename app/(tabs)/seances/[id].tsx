@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/theme";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -23,7 +23,6 @@ interface SeanceResult {
 }
 
 export default function SeanceDetailScreen() {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
   const seanceId = parseInt(Array.isArray(id) ? id[0] : id, 10);
   const [nom, setNom] = useState("Chargement...");
@@ -124,7 +123,7 @@ export default function SeanceDetailScreen() {
 
   const loadExercices = () => {
     try {
-      const result = db.getAllSync("SELECT * FROM exercices");
+      const result = db.getAllSync("SELECT * FROM exercices where id");
       setExercices(result);
     } catch (e) {
       console.error("Erreur chargement exercices :", e);
@@ -219,7 +218,7 @@ export default function SeanceDetailScreen() {
         </ScrollView>
       </View>
       <TextInput
-        style={styles.input}
+        style={[styles.input, styles.rowInput]}
         placeholder="Nom de l'exercice (ex: Curl)"
         placeholderTextColor={Colors.dark.textMuted}
         value={nomExercice}
@@ -230,7 +229,7 @@ export default function SeanceDetailScreen() {
       />
       <View style={styles.formRow}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.rowInput]}
           placeholder="Poids (kg)"
           keyboardType="numeric"
           placeholderTextColor={Colors.dark.textMuted}
@@ -238,7 +237,7 @@ export default function SeanceDetailScreen() {
           onChangeText={setPoids}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.rowInput]}
           placeholder="Reps"
           keyboardType="numeric"
           placeholderTextColor={Colors.dark.textMuted}
@@ -253,6 +252,7 @@ export default function SeanceDetailScreen() {
 
       <FlatList
         data={logs}
+        style={{ flex: 1 }}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <Pressable
@@ -305,7 +305,6 @@ const styles = StyleSheet.create({
 
   formRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   input: {
-    flex: 1,
     backgroundColor: Colors.dark.inputBackground,
     padding: 15,
     borderRadius: 10,
@@ -315,6 +314,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     borderWidth: 1,
     borderColor: Colors.dark.inputBorder,
+    flexShrink: 0,
   },
   addBtn: {
     backgroundColor: Colors.dark.buttonBackground,
@@ -330,7 +330,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
   },
-
+  rowInput: {
+    flex: 1,
+  },
   logItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -340,6 +342,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.dark.border,
+    flex: 1,
   },
   logItemPressed: {
     opacity: 0.7,

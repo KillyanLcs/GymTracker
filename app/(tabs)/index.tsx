@@ -1,9 +1,9 @@
+import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-import { Colors } from "@/constants/theme";
 export default function HomeScreen() {
   const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>GYM TRACKER</Text>

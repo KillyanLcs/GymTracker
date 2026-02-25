@@ -9,8 +9,7 @@ export const initDB = () => {
       PRAGMA foreign_keys = ON;
       CREATE TABLE IF NOT EXISTS exercices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nom TEXT UNIQUE NOT NULL,
-        category TEXT
+        nom TEXT UNIQUE NOT NULL
       );
       CREATE TABLE IF NOT EXISTS seances (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
