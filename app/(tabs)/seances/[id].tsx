@@ -22,21 +22,33 @@ interface SeanceResult {
   date: string;
 }
 
+interface ExerciceItem {
+  id: number;
+  nom: string;
+}
+
+interface LogItem {
+  id: number;
+  poids: number;
+  reps: number;
+  nom: string;
+}
+
 export default function SeanceDetailScreen() {
   const { id } = useLocalSearchParams();
   const seanceId = parseInt(Array.isArray(id) ? id[0] : id, 10);
   const [nom, setNom] = useState("Chargement...");
   const [nomExercice, setNomExercice] = useState("");
-  const [exercices, setExercices] = useState<any[]>([]);
+  const [exercices, setExercices] = useState<ExerciceItem[]>([]);
   const [exoSelectionne, setExoSelectionne] = useState<number | null>(null);
   const [poids, setPoids] = useState("");
   const [reps, setReps] = useState("");
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<LogItem[]>([]);
   const [date, setDate] = useState("Chargement...");
   const [tempsRestant, setTempsRestant] = useState(90);
   const [chronoActif, setChronoActif] = useState(false);
-  const [allExercices, setAllExercices] = useState<any[]>([]);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [allExercices, setAllExercices] = useState<ExerciceItem[]>([]);
+  const [suggestions, setSuggestions] = useState<ExerciceItem[]>([]);
   useEffect(() => {
     loadInfoSeance();
     loadExercices();
@@ -48,7 +60,7 @@ export default function SeanceDetailScreen() {
   const loadAllExercices = () => {
     //pour le remplissage auto lors de l'écriture
     try {
-      const result = db.getAllSync("Select * from exercices");
+      const result = db.getAllSync("Select * from exercices") as ExerciceItem[];
       setAllExercices(result);
     } catch (e) {
       console.error("Erreur chargement liste des exercices :", e);
@@ -153,7 +165,7 @@ export default function SeanceDetailScreen() {
          JOIN series ON series.id_exercice = exercices.id 
          WHERE series.id_seance = ?`,
         [seanceId],
-      );
+      ) as ExerciceItem[];
       setExercices(result);
     } catch (e) {
       console.error("Erreur chargement exercices de la séance :", e);
@@ -171,7 +183,7 @@ export default function SeanceDetailScreen() {
         ORDER BY series.id DESC
       `,
         [seanceId],
-      );
+      ) as LogItem[];
       setLogs(logs);
     } catch (e) {
       console.error("Erreur chargement logs :", e);

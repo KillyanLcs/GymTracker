@@ -21,9 +21,16 @@ const formatDate = (isoString: string) => {
   return { day, month };
 };
 
+interface SeanceItem {
+  id: number;
+  date: string;
+  nom: string | null;
+  notes: string | null;
+}
+
 export default function SessionListScreen() {
   const router = useRouter();
-  const [seances, setSeances] = useState<any[]>([]);
+  const [seances, setSeances] = useState<SeanceItem[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -33,7 +40,9 @@ export default function SessionListScreen() {
 
   const loadSeances = () => {
     try {
-      const data = db.getAllSync("SELECT * FROM seances ORDER BY date DESC");
+      const data = db.getAllSync(
+        "SELECT * FROM seances ORDER BY date DESC",
+      ) as SeanceItem[];
       setSeances(data);
     } catch (e) {
       console.error("Erreur chargement :", e);
@@ -65,7 +74,7 @@ export default function SessionListScreen() {
     );
   };
 
-  const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item }: { item: SeanceItem }) => {
     const { day, month } = formatDate(item.date);
     return (
       <Pressable

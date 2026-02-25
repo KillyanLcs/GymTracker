@@ -20,9 +20,16 @@ export default function HomeScreen() {
         >
           <Text style={styles.buttonText}>Créer une nouvelle séance</Text>
         </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => router.push("/exercices/lstExercices")}
+        >
+          <Text style={styles.buttonText}>
+            Voir tous les exercices existant
+          </Text>
+        </Pressable>
       </View>
     </View>
-    //ajouter une pages mes exercices pour afficher tout les exercices
   );
 }
 const styles = StyleSheet.create({

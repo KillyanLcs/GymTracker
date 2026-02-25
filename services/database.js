@@ -28,6 +28,9 @@ export const initDB = () => {
         FOREIGN KEY(id_exercice) REFERENCES exercices(id)
       );
 
+      CREATE INDEX IF NOT EXISTS idx_series_seance ON series(id_seance);
+      CREATE INDEX IF NOT EXISTS idx_series_exercice ON series(id_exercice);
+
     `);
     console.log("Base de données initialisée avec succès !");
   } catch (error) {
