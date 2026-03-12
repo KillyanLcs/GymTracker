@@ -1,5 +1,5 @@
 import { Colors } from "@/constants/theme";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import db from "../../../services/database";
@@ -76,6 +76,7 @@ export default function ExerciseDetail() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: "Detail exercice" }} />
       <Text style={styles.header}>Séries effectuée</Text>
       <FlatList
         data={allSeries}

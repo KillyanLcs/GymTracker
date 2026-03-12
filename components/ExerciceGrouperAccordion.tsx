@@ -8,8 +8,8 @@ interface Props {
   nom: string;
   series: LogItem[];
   tonnage: number;
-  supprimerRep: (id: number) => void;
   editerRep: (serie: LogItem) => void;
+  supprimerRep: (id: number) => void;
 }
 
 export default function ExerciceGroupAccordion({
@@ -17,6 +17,7 @@ export default function ExerciceGroupAccordion({
   series,
   tonnage,
   supprimerRep,
+  editerRep,
 }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 

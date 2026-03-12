@@ -1,13 +1,13 @@
 import { Colors } from "@/constants/theme";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
+    Alert,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import db from "../../../services/database";
 interface ExerciceItem {
@@ -80,6 +80,7 @@ export default function ExercisesScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: "Exercices" }} />
       <Text style={styles.header}>Exercices</Text>
       <FlatList
         data={allExercices}

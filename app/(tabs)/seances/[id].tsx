@@ -1,6 +1,7 @@
+import EditSerieModal from "@/components/EditSerieModal";
 import ExerciceGroupAccordion from "@/components/ExerciceGrouperAccordion";
 import { Colors } from "@/constants/theme";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
@@ -13,7 +14,6 @@ export default function SeanceDetailScreen() {
   const {
     nom,
     date,
-    logs,
     exercices,
     nomExercice,
     setNomExercice,
@@ -39,10 +39,14 @@ export default function SeanceDetailScreen() {
     formatDate,
     formatChrono,
     logsGrouper,
+    setSerieEnEdition,
+    modifierSerie,
+    serieEnEdition,
   } = useSeanceManager(seanceId);
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: "Detail de seance" }} />
       <Text style={styles.header}>
         Séance: {nom} du {formatDate(date)}
       </Text>
@@ -111,6 +115,7 @@ export default function SeanceDetailScreen() {
             series={item.series}
             tonnage={item.tonnage}
             supprimerRep={supprimerRep}
+            editerRep={(serie) => setSerieEnEdition(serie)}
           />
         )}
         ListEmptyComponent={
@@ -118,6 +123,11 @@ export default function SeanceDetailScreen() {
             Aucune série ajoutée pour le moment.
           </Text>
         }
+      />
+      <EditSerieModal
+        serie={serieEnEdition}
+        onClose={() => setSerieEnEdition(null)}
+        onSave={modifierSerie}
       />
     </View>
   );

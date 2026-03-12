@@ -9,7 +9,7 @@ interface Props {
   onPress: (serie: LogItem) => void;
 }
 
-export default function SerieLogItem({ item, onLongPress }: Props) {
+export default function SerieLogItem({ item, onLongPress, onPress }: Props) {
   return (
     <Pressable
       style={({ pressed }) => [

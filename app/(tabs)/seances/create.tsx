@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
     Platform,
@@ -49,6 +49,7 @@ export default function CreateSessionScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: "Nouvelle seance" }} />
       <Text style={styles.header}>Nouvelle Séance</Text>
       <Text style={styles.label}>Nom de la séance</Text>
       <TextInput

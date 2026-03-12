@@ -1,14 +1,14 @@
 import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
+    Alert,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import db from "../../../services/database";
 
@@ -109,6 +109,7 @@ export default function SessionListScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: "Historique des seances" }} />
       <Text style={styles.headerTitle}>Historique</Text>
       <FlatList
         data={seances}
