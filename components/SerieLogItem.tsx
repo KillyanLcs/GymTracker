@@ -6,6 +6,7 @@ import { LogItem } from "../types";
 interface Props {
   item: LogItem;
   onLongPress: (id: number) => void;
+  onPress: (serie: LogItem) => void;
 }
 
 export default function SerieLogItem({ item, onLongPress }: Props) {
@@ -16,6 +17,7 @@ export default function SerieLogItem({ item, onLongPress }: Props) {
         pressed && styles.logItemPressed,
       ]}
       onLongPress={() => onLongPress(item.id)}
+      onPress={() => onPress(item)}
     >
       <Text style={styles.logTitle}>{item.nom}</Text>
       <Text style={styles.logDetail}>

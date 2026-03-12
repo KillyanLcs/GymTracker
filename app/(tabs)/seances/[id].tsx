@@ -1,3 +1,4 @@
+import ExerciceGroupAccordion from "@/components/ExerciceGrouperAccordion";
 import { Colors } from "@/constants/theme";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
@@ -5,7 +6,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import AddSerieForm from "../../../components/AddSerieForm";
 import ChronoSection from "../../../components/Chrono";
-import SerieLogItem from "../../../components/SerieLogItem";
 import { useSeanceManager } from "../../../hooks/useSeanceManager";
 export default function SeanceDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -38,6 +38,7 @@ export default function SeanceDetailScreen() {
     supprimerExercice,
     formatDate,
     formatChrono,
+    logsGrouper,
   } = useSeanceManager(seanceId);
 
   return (
@@ -101,11 +102,16 @@ export default function SeanceDetailScreen() {
       />
 
       <FlatList
-        data={logs}
+        data={logsGrouper}
         style={{ flex: 1 }}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.nom}
         renderItem={({ item }) => (
-          <SerieLogItem item={item} onLongPress={supprimerRep} />
+          <ExerciceGroupAccordion
+            nom={item.nom}
+            series={item.series}
+            tonnage={item.tonnage}
+            supprimerRep={supprimerRep}
+          />
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>

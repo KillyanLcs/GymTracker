@@ -1,12 +1,12 @@
 import { Colors } from "@/constants/theme";
 import React from "react";
 import {
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { ExerciceItem } from "../types";
 
@@ -34,7 +34,7 @@ export default function AddSerieForm({
   handleAddSerie,
 }: Props) {
   return (
-    <View style={{ zIndex: 1 }}>
+    <View>
       <TextInput
         style={styles.input}
         placeholder="Nom de l'exercice (ex: Curl)"
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     position: "absolute",
-    top: 65,
+    top: 70,
     left: 0,
     right: 0,
     backgroundColor: Colors.dark.surface,

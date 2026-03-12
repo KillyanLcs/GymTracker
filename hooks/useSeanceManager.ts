@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Vibration } from "react-native";
 import db from "../services/database";
 import { ExerciceItem, ExoResult, LogItem, SeanceResult } from "../types";
@@ -10,6 +10,7 @@ export const useSeanceManager = (seanceId: number) => {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [exercices, setExercices] = useState<ExerciceItem[]>([]);
   const [allExercices, setAllExercices] = useState<ExerciceItem[]>([]);
+  const [serieEnEdition, setSerieEnEdition] = useState<LogItem | null>(null);
 
   // États des formulaires
   const [nomExercice, setNomExercice] = useState("");
@@ -31,6 +32,7 @@ export const useSeanceManager = (seanceId: number) => {
     loadAllExercices();
   }, [seanceId]);
 
+  //pour le chrono dans une séance
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (chronoActif && tempsRestant > 0) {
@@ -44,6 +46,7 @@ export const useSeanceManager = (seanceId: number) => {
     return () => clearInterval(interval);
   }, [chronoActif, tempsRestant]);
 
+  //pour affichage nom et date d'une séance
   const loadInfoSeance = () => {
     try {
       const seance = db.getFirstSync(
@@ -59,11 +62,12 @@ export const useSeanceManager = (seanceId: number) => {
     }
   };
 
+  //pour load tout les exercices réalisé dans la séance selectionné (en haut)
   const loadExercices = () => {
     try {
       const result = db.getAllSync(
         `SELECT DISTINCT exercices.id, exercices.nom FROM exercices 
-         JOIN series ON series.id_exercice = exercices.id WHERE series.id_seance = ?`,
+         JOIN series ON series.id_exercice = exercices.id WHERE series.id_seance = ? ORDER BY series.id DESC `,
         [seanceId],
       ) as ExerciceItem[];
       setExercices(result);
@@ -72,15 +76,19 @@ export const useSeanceManager = (seanceId: number) => {
     }
   };
 
+  //pour l'affichage de tous les exercices
   const loadAllExercices = () => {
     try {
-      const result = db.getAllSync("SELECT * FROM exercices") as ExerciceItem[];
+      const result = db.getAllSync(
+        "SELECT * FROM exercices ORDER BY exercices.nom ASC",
+      ) as ExerciceItem[];
       setAllExercices(result);
     } catch (e) {
       console.error("Erreur All Exercices:", e);
     }
   };
 
+  //pour affichage log en bas d'une séance
   const loadLogs = () => {
     try {
       const result = db.getAllSync(
@@ -95,12 +103,29 @@ export const useSeanceManager = (seanceId: number) => {
     }
   };
 
+  //pour un meilleur affichage des logs
+  const logsGrouper = useMemo(() => {
+    const groupes: Record<
+      string,
+      { nom: string; series: LogItem[]; tonnage: number }
+    > = {};
+    logs.forEach((log) => {
+      if (!groupes[log.nom]) {
+        groupes[log.nom] = { nom: log.nom, series: [], tonnage: 0 };
+      }
+      groupes[log.nom].series.push(log);
+      groupes[log.nom].tonnage += log.poids * log.reps;
+    });
+    return Object.values(groupes);
+  }, [logs]);
+
+  //Pour affichage de suggestion
   const gererSaisieExo = (text: string) => {
     setNomExercice(text);
     setExoSelectionne(null);
     if (text.length > 0) {
       const resultats = allExercices.filter((exo) =>
-        exo.nom.toLowerCase().includes(text.toLowerCase()),
+        exo.nom.toLowerCase().startsWith(text.toLowerCase()),
       );
       setSuggestions(resultats);
     } else {
@@ -108,6 +133,7 @@ export const useSeanceManager = (seanceId: number) => {
     }
   };
 
+  // ajout de série
   const handleAddSerie = () => {
     if (!nomExercice.trim() || !poids || !reps) {
       Alert.alert(
@@ -150,6 +176,7 @@ export const useSeanceManager = (seanceId: number) => {
     }
   };
 
+  //supression d'une répétition
   const supprimerRep = (id: number) => {
     Alert.alert("Supprimer la série", "Êtes-vous sûr ?", [
       { text: "Annuler", style: "cancel" },
@@ -164,6 +191,27 @@ export const useSeanceManager = (seanceId: number) => {
     ]);
   };
 
+  const modifierSerie = (
+    id: number,
+    nouveauPoids: string,
+    nouvellesReps: string,
+  ) => {
+    if (!nouveauPoids || !nouvellesReps) return;
+
+    try {
+      db.runSync("UPDATE series SET poids = ?, reps = ? WHERE id = ?", [
+        parseFloat(nouveauPoids),
+        parseInt(nouvellesReps),
+        id,
+      ]);
+      setSerieEnEdition(null);
+      loadLogs();
+    } catch (e) {
+      console.error("Erreur modification série :", e);
+      Alert.alert("Erreur", "Impossible de modifier la série.");
+    }
+  };
+  //suppression d'un exercices
   const supprimerExercice = (id: number) => {
     Alert.alert("Supprimer l'exercice", "Toutes les séries seront effacées.", [
       { text: "Annuler", style: "cancel" },
@@ -223,5 +271,9 @@ export const useSeanceManager = (seanceId: number) => {
     supprimerExercice,
     formatDate,
     formatChrono,
+    logsGrouper,
+    serieEnEdition,
+    setSerieEnEdition,
+    modifierSerie,
   };
 };
