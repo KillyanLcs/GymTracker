@@ -1,42 +1,17 @@
 import { Colors } from "@/constants/theme";
-import { Stack, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-import {
-    Alert,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import db from "../../../services/database";
-interface ExerciceItem {
-  id: number;
-  nom: string;
-}
+import { Stack, useRouter } from "expo-router";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import ExerciseGridItem from "../../../components/ExerciseGridItem";
+import { useExercisesList } from "../../../hooks/useExercisesList";
 
 export default function ExercisesScreen() {
-  const [allExercices, setAllExercices] = useState<ExerciceItem[]>([]);
+  const { allExercices, supprimerExercice } = useExercisesList();
   const router = useRouter();
-  useFocusEffect(
-    useCallback(() => {
-      loadAllExercices();
-    }, []),
-  );
 
-  const loadAllExercices = () => {
-    try {
-      const result = db.getAllSync("Select * from exercices") as ExerciceItem[];
-      setAllExercices(result);
-    } catch (e) {
-      console.error("Erreur chargement liste des exercices :", e);
-    }
-  };
-
-  const renderItem = ({ item }: { item: ExerciceItem }) => {
+  const renderItem = ({ item }: { item: (typeof allExercices)[number] }) => {
     return (
-      <Pressable
-        style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
+      <ExerciseGridItem
+        nom={item.nom}
         onPress={() => {
           router.push({
             pathname: "/exercices/[idExo]",
@@ -44,44 +19,20 @@ export default function ExercisesScreen() {
           });
         }}
         onLongPress={() => supprimerExercice(item.id)}
-        delayLongPress={500}
-      >
-        <View style={styles.btnContent}>
-          <Text style={styles.btnText}>{item.nom}</Text>
-          <Text style={styles.btnArrow}>›</Text>
-        </View>
-      </Pressable>
-    );
-  };
-
-  const supprimerExercice = (id: number) => {
-    Alert.alert(
-      "Supprimer l'exercice",
-      "Êtes-vous sûr ? Toutes les séries de cet exercice seront définitivement effacées.",
-      [
-        { text: "Annuler", style: "cancel" },
-        {
-          text: "Supprimer",
-          style: "destructive",
-          onPress: () => {
-            try {
-              db.runSync("DELETE FROM series WHERE id_exercice = ?", [id]);
-              db.runSync("DELETE FROM exercices WHERE id = ?", [id]);
-              loadAllExercices();
-            } catch (e) {
-              console.error("Erreur suppression exercice :", e);
-              Alert.alert("Erreur", "Impossible de supprimer cet exercice.");
-            }
-          },
-        },
-      ],
+      />
     );
   };
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: "Exercices" }} />
-      <Text style={styles.header}>Exercices</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerLabel}>BIBLIOTHÈQUE</Text>
+        <Text style={styles.headerTitle}>Exercices</Text>
+        <Text style={styles.headerSub}>
+          {allExercices.length} exercice{allExercices.length !== 1 ? "s" : ""}
+        </Text>
+      </View>
       <FlatList
         data={allExercices}
         keyExtractor={(item) => item.id.toString()}
@@ -103,12 +54,33 @@ export default function ExercisesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: Colors.dark.background },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.dark.background,
+  },
   header: {
-    fontSize: 22,
+    paddingTop: 16,
+    paddingBottom: 14,
+    paddingLeft: 4,
+  },
+  headerLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: Colors.dark.tint,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
     color: Colors.dark.text,
+    letterSpacing: 0.2,
+  },
+  headerSub: {
+    marginTop: 3,
+    fontSize: 13,
+    color: Colors.dark.textMuted,
   },
   listContent: {
     paddingBottom: 50,
@@ -132,35 +104,5 @@ const styles = StyleSheet.create({
     color: Colors?.dark?.textMuted,
     textAlign: "center",
     marginTop: 5,
-  },
-  btn: {
-    flex: 1,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    overflow: "hidden",
-  },
-  btnPressed: {
-    backgroundColor: Colors.dark.surfaceAlt,
-    opacity: 0.8,
-  },
-  btnContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 14,
-  },
-  btnText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: Colors.dark.text,
-    flex: 1,
-  },
-  btnArrow: {
-    fontSize: 20,
-    color: Colors.dark.textMuted,
-    marginLeft: 8,
   },
 });

@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import db from "../../../services/database";
 
@@ -12,18 +12,11 @@ interface SerieItem {
 }
 
 export default function ExerciseDetail() {
-  const { id } = useLocalSearchParams();
+  const { idExo } = useLocalSearchParams();
   const [allSeries, setAllSeries] = useState<SerieItem[]>([]);
-  const exerciseId = parseInt(Array.isArray(id) ? id[0] : id, 10);
-  useEffect(() => {
-    if (!isNaN(exerciseId)) {
-      loadAllSeries();
-    } else {
-      console.error("L'ID de l'exercice n'a pas été trouvé dans l'URL !");
-    }
-  }, [exerciseId]);
+  const exerciseId = parseInt(Array.isArray(idExo) ? idExo[0] : idExo, 10);
 
-  const loadAllSeries = () => {
+  const loadAllSeries = useCallback(() => {
     try {
       const result = db.getAllSync(
         "SELECT series.id, series.poids, series.reps, seances.date FROM series JOIN seances ON series.id_seance = seances.id WHERE series.id_exercice = ? ORDER BY seances.date DESC",
@@ -33,7 +26,15 @@ export default function ExerciseDetail() {
     } catch (e) {
       console.error("Erreur chargement liste des series :", e);
     }
-  };
+  }, [exerciseId]);
+
+  useEffect(() => {
+    if (!isNaN(exerciseId)) {
+      loadAllSeries();
+    } else {
+      console.error("L'ID de l'exercice n'a pas été trouvé dans l'URL !");
+    }
+  }, [exerciseId, loadAllSeries]);
 
   const formatDate = (value: string) => {
     const parsed = new Date(value);
@@ -74,10 +75,21 @@ export default function ExerciseDetail() {
     );
   };
 
+  const totalTonnage = allSeries.reduce((sum, s) => sum + s.poids * s.reps, 0);
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: "Detail exercice" }} />
-      <Text style={styles.header}>Séries effectuée</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerLabel}>HISTORIQUE</Text>
+        <Text style={styles.headerTitle}>Séries</Text>
+        {allSeries.length > 0 && (
+          <Text style={styles.headerSub}>
+            {allSeries.length} série{allSeries.length !== 1 ? "s" : ""} ·{" "}
+            {totalTonnage} kg de tonnage
+          </Text>
+        )}
+      </View>
       <FlatList
         data={allSeries}
         keyExtractor={(item) => item.id.toString()}
@@ -97,12 +109,33 @@ export default function ExerciseDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: Colors.dark.background },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.dark.background,
+  },
   header: {
-    fontSize: 22,
+    paddingTop: 16,
+    paddingBottom: 14,
+    paddingLeft: 4,
+  },
+  headerLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: Colors.dark.tint,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
     color: Colors.dark.text,
+    letterSpacing: 0.2,
+  },
+  headerSub: {
+    marginTop: 3,
+    fontSize: 13,
+    color: Colors.dark.textMuted,
   },
   listContent: {
     paddingBottom: 50,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Vibration } from "react-native";
 import db from "../services/database";
 import { ExerciceItem, ExoResult, LogItem, SeanceResult } from "../types";
@@ -25,12 +25,69 @@ export const useSeanceManager = (seanceId: number) => {
   const [tempsChoisi, setTempsChoisi] = useState(90);
   const [showPicker, setShowPicker] = useState(false);
 
+  //pour affichage nom et date d'une séance
+  const loadInfoSeance = useCallback(() => {
+    try {
+      const seance = db.getFirstSync(
+        "SELECT nom, date FROM seances WHERE id = ?",
+        [seanceId],
+      ) as SeanceResult | null;
+      if (seance) {
+        setNom(seance.nom);
+        setDate(seance.date);
+      }
+    } catch (e) {
+      console.error("Erreur Info Séance:", e);
+    }
+  }, [seanceId]);
+
+  //pour load tout les exercices réalisé dans la séance selectionné (en haut)
+  const loadExercices = useCallback(() => {
+    try {
+      const result = db.getAllSync(
+        `SELECT DISTINCT exercices.id, exercices.nom FROM exercices 
+         JOIN series ON series.id_exercice = exercices.id WHERE series.id_seance = ? ORDER BY series.id DESC `,
+        [seanceId],
+      ) as ExerciceItem[];
+      setExercices(result);
+    } catch (e) {
+      console.error("Erreur Exercices:", e);
+    }
+  }, [seanceId]);
+
+  //pour l'affichage de tous les exercices
+  const loadAllExercices = useCallback(() => {
+    try {
+      const result = db.getAllSync(
+        "SELECT * FROM exercices ORDER BY exercices.nom ASC",
+      ) as ExerciceItem[];
+      setAllExercices(result);
+    } catch (e) {
+      console.error("Erreur All Exercices:", e);
+    }
+  }, []);
+
+  //pour affichage log en bas d'une séance
+  const loadLogs = useCallback(() => {
+    try {
+      const result = db.getAllSync(
+        `SELECT series.id, series.poids, series.reps, exercices.nom FROM series 
+         JOIN exercices ON series.id_exercice = exercices.id 
+         WHERE series.id_seance = ? ORDER BY series.id DESC`,
+        [seanceId],
+      ) as LogItem[];
+      setLogs(result);
+    } catch (e) {
+      console.error("Erreur Logs:", e);
+    }
+  }, [seanceId]);
+
   useEffect(() => {
     loadInfoSeance();
     loadExercices();
     loadLogs();
     loadAllExercices();
-  }, [seanceId]);
+  }, [loadInfoSeance, loadExercices, loadLogs, loadAllExercices]);
 
   //pour le chrono dans une séance
   useEffect(() => {
@@ -45,63 +102,6 @@ export const useSeanceManager = (seanceId: number) => {
     }
     return () => clearInterval(interval);
   }, [chronoActif, tempsRestant]);
-
-  //pour affichage nom et date d'une séance
-  const loadInfoSeance = () => {
-    try {
-      const seance = db.getFirstSync(
-        "SELECT nom, date FROM seances WHERE id = ?",
-        [seanceId],
-      ) as SeanceResult | null;
-      if (seance) {
-        setNom(seance.nom);
-        setDate(seance.date);
-      }
-    } catch (e) {
-      console.error("Erreur Info Séance:", e);
-    }
-  };
-
-  //pour load tout les exercices réalisé dans la séance selectionné (en haut)
-  const loadExercices = () => {
-    try {
-      const result = db.getAllSync(
-        `SELECT DISTINCT exercices.id, exercices.nom FROM exercices 
-         JOIN series ON series.id_exercice = exercices.id WHERE series.id_seance = ? ORDER BY series.id DESC `,
-        [seanceId],
-      ) as ExerciceItem[];
-      setExercices(result);
-    } catch (e) {
-      console.error("Erreur Exercices:", e);
-    }
-  };
-
-  //pour l'affichage de tous les exercices
-  const loadAllExercices = () => {
-    try {
-      const result = db.getAllSync(
-        "SELECT * FROM exercices ORDER BY exercices.nom ASC",
-      ) as ExerciceItem[];
-      setAllExercices(result);
-    } catch (e) {
-      console.error("Erreur All Exercices:", e);
-    }
-  };
-
-  //pour affichage log en bas d'une séance
-  const loadLogs = () => {
-    try {
-      const result = db.getAllSync(
-        `SELECT series.id, series.poids, series.reps, exercices.nom FROM series 
-         JOIN exercices ON series.id_exercice = exercices.id 
-         WHERE series.id_seance = ? ORDER BY series.id DESC`,
-        [seanceId],
-      ) as LogItem[];
-      setLogs(result);
-    } catch (e) {
-      console.error("Erreur Logs:", e);
-    }
-  };
 
   //pour un meilleur affichage des logs
   const logsGrouper = useMemo(() => {

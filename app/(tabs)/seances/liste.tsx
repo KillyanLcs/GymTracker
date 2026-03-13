@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import db from "../../../services/database";
 
@@ -32,13 +32,7 @@ export default function SessionListScreen() {
   const router = useRouter();
   const [seances, setSeances] = useState<SeanceItem[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadSeances();
-    }, []),
-  );
-
-  const loadSeances = () => {
+  const loadSeances = useCallback(() => {
     try {
       const data = db.getAllSync(
         "SELECT * FROM seances ORDER BY date DESC",
@@ -47,7 +41,13 @@ export default function SessionListScreen() {
     } catch (e) {
       console.error("Erreur chargement :", e);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSeances();
+    }, [loadSeances]),
+  );
 
   const supprimerSeance = (id: number) => {
     Alert.alert(
@@ -110,17 +110,27 @@ export default function SessionListScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: "Historique des seances" }} />
-      <Text style={styles.headerTitle}>Historique</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerLabel}>MES SEANCES</Text>
+        <Text style={styles.headerTitle}>Historique</Text>
+        {seances.length > 0 && (
+          <Text style={styles.headerSub}>
+            {seances.length} session{seances.length > 1 ? "s" : ""} enregistree
+            {seances.length > 1 ? "s" : ""}
+          </Text>
+        )}
+      </View>
       <FlatList
         data={seances}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Aucune séance pour le moment.</Text>
+            <Text style={styles.emptyTitle}>Aucune seance</Text>
             <Text style={styles.emptySubText}>
-              Appuie sur "Créer une nouvelle séance" pour commencer
+              Lance ta premiere seance depuis l&apos;accueil
             </Text>
           </View>
         }
@@ -132,71 +142,94 @@ export default function SessionListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors?.dark?.background,
+    backgroundColor: Colors.dark.background,
     paddingHorizontal: 16,
+  },
+  header: {
     paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 4,
+  },
+  headerLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: Colors.dark.tint,
+    marginBottom: 6,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
-    color: Colors?.dark?.text,
-    marginBottom: 20,
-    marginLeft: 4,
+    color: Colors.dark.text,
+    letterSpacing: 0.2,
+  },
+  headerSub: {
+    marginTop: 4,
+    fontSize: 14,
+    color: Colors.dark.textMuted,
+  },
+  listContent: {
+    paddingBottom: 50,
   },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors?.dark?.surface,
+    backgroundColor: Colors.dark.surface,
     borderRadius: 16,
-    padding: 12,
-    marginBottom: 12,
-    borderColor: Colors?.dark?.border,
+    padding: 14,
+    marginBottom: 10,
+    borderColor: Colors.dark.border,
     borderWidth: 1,
   },
   cardPressed: {
-    opacity: 0.7,
+    opacity: 0.65,
   },
   dateBox: {
-    backgroundColor: Colors?.dark?.surfaceAlt,
-    borderRadius: 10,
-    width: 50,
-    height: 50,
+    backgroundColor: Colors.dark.surfaceAlt,
+    borderRadius: 12,
+    width: 52,
+    height: 52,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   DateJour: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors?.dark?.text,
+    fontSize: 20,
+    fontWeight: "700",
+    color: Colors.dark.text,
+    lineHeight: 22,
   },
   dateMois: {
     fontSize: 10,
-    color: Colors?.dark?.textMuted,
-    fontWeight: "600",
+    color: Colors.dark.tint,
+    fontWeight: "700",
+    letterSpacing: 0.6,
   },
   infoBox: {
     flex: 1,
     justifyContent: "center",
   },
   title: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "600",
-    color: Colors?.dark?.text,
-    marginBottom: 2,
+    color: Colors.dark.text,
+    marginBottom: 3,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors?.dark?.textMuted,
+    fontSize: 13,
+    color: Colors.dark.textMuted,
   },
   emptyContainer: {
-    marginTop: 100,
+    marginTop: 120,
     alignItems: "center",
+    gap: 8,
   },
-  emptyText: {
+  emptyTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: Colors?.dark?.text,
+    color: Colors.dark.text,
   },
   emptySubText: {
     fontSize: 14,

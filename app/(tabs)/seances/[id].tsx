@@ -47,12 +47,20 @@ export default function SeanceDetailScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: "Detail de seance" }} />
-      <Text style={styles.header}>
-        Séance: {nom} du {formatDate(date)}
-      </Text>
 
-      <View style={{ height: 50, marginBottom: 15 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {nom}
+        </Text>
+        <Text style={styles.headerSub}>{formatDate(date)}</Text>
+      </View>
+
+      <View style={styles.exoScrollWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.exoScrollContent}
+        >
           {exercices.map((exo) => (
             <Pressable
               key={exo.id}
@@ -120,7 +128,7 @@ export default function SeanceDetailScreen() {
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            Aucune série ajoutée pour le moment.
+            Aucune serie ajoutee pour le moment.
           </Text>
         }
       />
@@ -134,32 +142,68 @@ export default function SeanceDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: Colors.dark.background },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.dark.background,
+  },
   header: {
-    fontSize: 22,
+    paddingTop: 16,
+    paddingBottom: 14,
+    paddingLeft: 4,
+  },
+  headerLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: Colors.dark.tint,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 20,
     color: Colors.dark.text,
+    letterSpacing: 0.2,
+  },
+  headerSub: {
+    marginTop: 3,
+    fontSize: 13,
+    color: Colors.dark.textMuted,
+  },
+  exoScrollWrap: {
+    height: 44,
+    marginBottom: 12,
+  },
+  exoScrollContent: {
+    alignItems: "center",
+    gap: 8,
   },
   exoBtn: {
-    padding: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     backgroundColor: Colors.dark.surfaceAlt,
-    borderRadius: 20,
-    marginRight: 10,
+    borderRadius: 999,
     borderWidth: 1,
     borderColor: Colors.dark.border,
-    height: 40,
     justifyContent: "center",
   },
   exoBtnActive: {
-    backgroundColor: Colors.dark.buttonBackground,
-    borderColor: Colors.dark.border,
+    backgroundColor: Colors.dark.tint,
+    borderColor: Colors.dark.tint,
   },
-  exoText: { color: Colors.dark.textMuted },
-  exoTextActive: { color: Colors.dark.text, fontWeight: "bold" },
+  exoText: {
+    color: Colors.dark.textMuted,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  exoTextActive: {
+    color: Colors.dark.background,
+    fontWeight: "700",
+  },
   emptyText: {
     textAlign: "center",
     color: Colors.dark.textMuted,
     marginTop: 30,
+    fontSize: 14,
   },
 });
