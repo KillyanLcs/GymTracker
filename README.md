@@ -44,4 +44,4 @@ Si vous souhaitez faire tourner le projet sur votre propre machine :
 
 |            L'Écran de Séance             |               Mes Programmes                |                   l'Accueil                   |
 | :--------------------------------------: | :-----------------------------------------: | :-------------------------------------------: |
-| ![Séance](assets/screenshots/seance.png) | ![Chrono](assets/screenshots/programme.png) | ![Programmes](assets/screenshots/accueil.jpg) |
+| ![Séance](assets/screenshots/seance.png) | ![Chrono](assets/screenshots/programme.png) | ![Programmes](assets/screenshots/accueil.png) |
