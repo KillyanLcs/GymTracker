@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     position: "absolute",
-    top: 70,
+    top: 60,
     left: 0,
     right: 0,
     backgroundColor: Colors.dark.surface,

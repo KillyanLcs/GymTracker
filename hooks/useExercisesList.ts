@@ -9,7 +9,9 @@ export const useExercisesList = () => {
 
   const loadAllExercices = useCallback(() => {
     try {
-      const result = db.getAllSync("SELECT * FROM exercices") as ExerciceItem[];
+      const result = db.getAllSync(
+        "SELECT * FROM exercices order by nom ASC",
+      ) as ExerciceItem[];
       setAllExercices(result);
     } catch (e) {
       console.error("Erreur chargement liste des exercices :", e);
