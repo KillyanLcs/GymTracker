@@ -95,6 +95,7 @@ export default function SeanceDetailScreen() {
         gererSaisieExo={gererSaisieExo}
         setPoids={setPoids}
         setReps={setReps}
+        onSubmitNomExercice={() => setSuggestions([])}
         onSelectSuggestion={(id, nom) => {
           setNomExercice(nom);
           setExoSelectionne(id);

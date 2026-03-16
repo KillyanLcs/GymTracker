@@ -19,6 +19,7 @@ interface Props {
   setPoids: (text: string) => void;
   setReps: (text: string) => void;
   onSelectSuggestion: (id: number, nom: string) => void;
+  onSubmitNomExercice: () => void;
   handleAddSerie: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function AddSerieForm({
   setPoids,
   setReps,
   onSelectSuggestion,
+  onSubmitNomExercice,
   handleAddSerie,
 }: Props) {
   return (
@@ -41,6 +43,9 @@ export default function AddSerieForm({
         placeholderTextColor={Colors.dark.textMuted}
         value={nomExercice}
         onChangeText={gererSaisieExo}
+        onSubmitEditing={onSubmitNomExercice}
+        onBlur={onSubmitNomExercice}
+        returnKeyType="done"
       />
 
       {suggestions.length > 0 && (
