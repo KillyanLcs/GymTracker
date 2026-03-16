@@ -27,7 +27,8 @@ export default function SeanceDetailScreen() {
     setReps,
     tempsRestant,
     chronoActif,
-    setChronoActif,
+    demarrerChrono,
+    arreterChrono,
     tempsChoisi,
     setTempsChoisi,
     showPicker,
@@ -109,7 +110,8 @@ export default function SeanceDetailScreen() {
         tempsChoisi={tempsChoisi}
         showPicker={showPicker}
         setShowPicker={setShowPicker}
-        setChronoActif={setChronoActif}
+        arreterChrono={arreterChrono}
+        demarrerChrono={demarrerChrono}
         setTempsChoisi={setTempsChoisi}
         formatChrono={formatChrono}
       />

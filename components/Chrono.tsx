@@ -10,9 +10,11 @@ interface Props {
   tempsChoisi: number;
   showPicker: boolean;
   setShowPicker: (show: boolean) => void;
-  setChronoActif: (actif: boolean) => void;
+  // setChronoActif: (actif: boolean) => void;
   setTempsChoisi: (temps: number) => void;
   formatChrono: (secondes: number) => string;
+  demarrerChrono: (secondes: number) => void;
+  arreterChrono: () => void;
 }
 
 export default function ChronoSection({
@@ -21,9 +23,9 @@ export default function ChronoSection({
   tempsChoisi,
   showPicker,
   setShowPicker,
-  setChronoActif,
   setTempsChoisi,
   formatChrono,
+  arreterChrono,
 }: Props) {
   return (
     <>
@@ -48,10 +50,7 @@ export default function ChronoSection({
       ) : (
         <View style={styles.chronoActiveContainer}>
           <Text style={styles.chronoText}>⏳ {formatChrono(tempsRestant)}</Text>
-          <Pressable
-            onPress={() => setChronoActif(false)}
-            style={{ marginTop: 10 }}
-          >
+          <Pressable onPress={arreterChrono} style={{ marginTop: 10 }}>
             <Text style={{ color: "#FF4444", fontWeight: "bold" }}>
               Arrêter le chrono
             </Text>

@@ -1,7 +1,18 @@
+import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Vibration } from "react-native";
+import { Alert, AppState } from "react-native";
 import db from "../services/database";
 import { ExerciceItem, ExoResult, LogItem, SeanceResult } from "../types";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export const useSeanceManager = (seanceId: number) => {
   // --- LES ÉTATS (Variables) ---
@@ -24,6 +35,7 @@ export const useSeanceManager = (seanceId: number) => {
   const [chronoActif, setChronoActif] = useState(false);
   const [tempsChoisi, setTempsChoisi] = useState(90);
   const [showPicker, setShowPicker] = useState(false);
+  const [heureFinChrono, setHeureFinChrono] = useState<number | null>(null);
 
   //pour affichage nom et date d'une séance
   const loadInfoSeance = useCallback(() => {
@@ -89,19 +101,76 @@ export const useSeanceManager = (seanceId: number) => {
     loadAllExercices();
   }, [loadInfoSeance, loadExercices, loadLogs, loadAllExercices]);
 
-  //pour le chrono dans une séance
+  ///////////////////////// POUR GESTION DU CHRONO ///////////////////////////////////////
+  // pour faire tourner le chrono
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-    if (chronoActif && tempsRestant > 0) {
+
+    if (chronoActif && heureFinChrono) {
       interval = setInterval(() => {
-        setTempsRestant((prev) => prev - 1);
+        const reste = Math.round((heureFinChrono - Date.now()) / 1000);
+        if (reste <= 0) {
+          arreterChrono();
+        } else {
+          setTempsRestant(reste);
+        }
       }, 1000);
-    } else if (tempsRestant === 0 && chronoActif) {
-      setChronoActif(false);
-      Vibration.vibrate(4000);
     }
+
     return () => clearInterval(interval);
-  }, [chronoActif, tempsRestant]);
+  }, [chronoActif, heureFinChrono]);
+
+  // gérer le réveil du téléphone
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && chronoActif && heureFinChrono) {
+        const reste = Math.round((heureFinChrono - Date.now()) / 1000);
+        if (reste <= 0) {
+          arreterChrono();
+        } else {
+          setTempsRestant(reste);
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [chronoActif, heureFinChrono]);
+  //pour le chrono dans une séance
+  const demarrerChrono = async (secondes: number) => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      alert(
+        "Activez les notifications pour que le chrono sonne en arrière-plan !",
+      );
+    }
+
+    const dateFin = Date.now() + secondes * 1000;
+    setHeureFinChrono(dateFin);
+    setTempsRestant(secondes);
+    setChronoActif(true);
+
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "⏱️ Fin du repos !",
+        body: "ALLER AU BOULOT.",
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: secondes,
+      },
+    });
+  };
+
+  const arreterChrono = async () => {
+    setChronoActif(false);
+    setTempsRestant(0);
+    setHeureFinChrono(null);
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  };
 
   //pour un meilleur affichage des logs
   const logsGrouper = useMemo(() => {
@@ -168,8 +237,7 @@ export const useSeanceManager = (seanceId: number) => {
       loadLogs();
       loadExercices();
       loadAllExercices();
-      setTempsRestant(tempsChoisi);
-      setChronoActif(true);
+      demarrerChrono(tempsChoisi);
     } catch (e) {
       console.error("Erreur ajout:", e);
       Alert.alert("Erreur", "Impossible d'ajouter la série.");
@@ -275,5 +343,7 @@ export const useSeanceManager = (seanceId: number) => {
     serieEnEdition,
     setSerieEnEdition,
     modifierSerie,
+    demarrerChrono,
+    arreterChrono,
   };
 };
